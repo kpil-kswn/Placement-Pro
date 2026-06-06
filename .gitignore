@@ -1,0 +1,40 @@
+# Environment files anywhere in the repository
+.env
+.env.*
+!.env.example
+
+# Frontend
+node_modules/
+.next/
+out/
+build/
+coverage/
+.pnp
+.pnp.*
+.yarn/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Python backend
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Logs
+*.log
+
+# OS and editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Secret files
+*.pem
+*.key
+credentials.json
+service-account.json
