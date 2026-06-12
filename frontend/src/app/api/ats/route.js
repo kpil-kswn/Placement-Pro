@@ -10,7 +10,7 @@ export async function POST(request){
             body:formData,
         })
 
-        const data = backendResponse.json();
+        const data = await backendResponse.json();
         if(!backendResponse.ok){
             return NextResponse.json({error:data.detail || "FastAPI error"},
                 {status:backendResponse.status}
@@ -18,7 +18,7 @@ export async function POST(request){
         }
         return NextResponse.json(data);
     } catch (error){
-        console.log("Next.js API Error",e)
+        console.log("Next.js API Error",error)
         return NextResponse.json(
             {error:"Failed to connect to backend server."},
             {status:500}

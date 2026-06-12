@@ -29,26 +29,19 @@ export default function ATSPage() {
     formData.append("resume", file);
     formData.append("job_description", jobDesc);
 
-    // Inside your handleSubmit function...
-
-    const res = await fetch("/api/ats", {
+    try {
+        const res = await fetch("/api/ats", {
       method: "POST",
       body: formData,
     });
 
     const rawData = await res.json();
-    console.log("🚨 RAW DATA FROM BACKEND:", rawData); // <--- ADD THIS LINE
 
     if (res.ok) {
-      // Let's add a safety check here to parse the data if it's nested or stringified
-
       let finalResult = rawData;
-
-      // 1. If FastAPI wrapped it in a "data" or "response" key:
       if (rawData.data) finalResult = rawData.data;
       else if (rawData.response) finalResult = rawData.response;
 
-      // 2. If the AI sent back a raw string instead of a JSON object:
       if (typeof finalResult === "string") {
         try {
           finalResult = JSON.parse(finalResult);
@@ -56,12 +49,18 @@ export default function ATSPage() {
           console.error("Failed to parse AI string into JSON", e);
         }
       }
-
-      console.log("✅ PARSED RESULT FOR UI:", finalResult); // <--- ADD THIS LINE
       setResult(finalResult);
+      setLoading(false)
     } else {
       setError(rawData.error || "Something went wrong.");
+      setLoading(false)
     }
+    } catch (error){
+      console.log(error)
+      setError("Network Error. Please try again.")
+      setLoading(false)
+    }
+    
   };
 
   return (
@@ -150,7 +149,7 @@ export default function ATSPage() {
                 <h3 className="text-gray-400 text-sm font-semibold tracking-widest uppercase mb-2">
                   Alignment Score
                 </h3>
-                <div className="text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400">
+                <div className="text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-linear-to-br from-white to-gray-400">
                   {result.match_score}%
                 </div>
               </div>

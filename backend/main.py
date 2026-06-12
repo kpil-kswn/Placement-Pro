@@ -9,7 +9,7 @@ load_dotenv()
 
 app = FastAPI(title="PlacementPro Backend")
 
-frontend_url = os.getenv('FRONTEND_URL')
+frontend_url = str(os.getenv("FRONTEND_URL", "http://localhost:3000"))
 app.add_middleware(
     CORSMiddleware,
     allow_origins = [frontend_url],
@@ -21,7 +21,8 @@ app.add_middleware(
 @app.post("/api/v1/ats/scan",response_model=ATSResult)
 async def scan_resume(resume:UploadFile=File(...),
                       job_description:str=Form(...)):
-    if not resume.filename.endswith('.pdf'):
+    safe_filename = resume.filename or ""
+    if not safe_filename.endswith(".pdf"):
         raise HTTPException(status_code=400,detail="Only PDF files are allowed")
     try:
         file_bytes = await resume.read()
@@ -34,7 +35,8 @@ async def scan_resume(resume:UploadFile=File(...),
 
 @app.post("/api/v1/resume/questions", response_model=ResumeQuestionsResult)
 async def get_resume_questions(resume:UploadFile=File(...)) -> ResumeQuestionsResult:
-    if not resume.filename.endswith('.pdf'):
+    safe_filename = resume.filename or ""
+    if not safe_filename.endswith('.pdf'):
         raise HTTPException(status_code=400,detail="Only PDF files are allowed")
     file_bytes = await resume.read()
     resume_text = extract_text_from_pdf(file_bytes)

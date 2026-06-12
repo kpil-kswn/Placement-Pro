@@ -5,7 +5,6 @@ import json
 from google import genai
 from google.genai import types
 import time
-
 from models import ATSResult
 import dotenv
 from dotenv import load_dotenv
@@ -62,14 +61,11 @@ def evaluate_resume_against_jd(resume_text:str,job_description:str)->dict:
             
         except Exception as e:
             error_message = str(e)
-            # Check if it's a 503 traffic error
             if "503" in error_message or "UNAVAILABLE" in error_message:
                 if attempt < max_retries - 1:
-                    # Exponential backoff: Wait 2 seconds, then 4 seconds...
                     sleep_time = 2 ** (attempt + 1)
                     print(f"API busy (503). Retrying in {sleep_time} seconds...")
                     time.sleep(sleep_time)
-                    continue # Try the loop again
-            
-            # If it's a different error (like a bad API key) or we ran out of retries, crash gracefully
+                    continue 
             raise e
+    raise Exception("Max retries exceeded. AI evaluation service is currently unavailable.")
