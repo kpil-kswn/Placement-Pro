@@ -48,3 +48,4 @@ def generate_resume_questions(resume_text:str)->ResumeQuestionsResult:
                     time.sleep(sleep_time)
                     continue
             raise e
+    raise Exception("Max tries excceded.AI evaluation services are currently Unavailable.")

@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link";
 export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6 pt-20 text-center">
@@ -17,9 +18,9 @@ export default function Home() {
         </p>
 
         {/* Primary Call to Action */}
-        <button className="bg-gray-900 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+        <Link href="/ats" className="bg-gray-900 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
           Start Preparing Now
-        </button>
+        </Link>
         
       </div>
     </main>

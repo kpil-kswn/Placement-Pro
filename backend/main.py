@@ -1,5 +1,6 @@
 from fastapi import FastAPI,UploadFile,File,Form,HTTPException,Body
 from services.ats_scanner import evaluate_resume_against_jd,extract_text_from_pdf
+from services.chat_service import process_chat_message
 from models import ATSResult,ResumeQuestionsResult
 from services.question_generator import generate_resume_questions
 from fastapi.middleware.cors import CORSMiddleware
@@ -47,3 +48,30 @@ async def get_resume_questions(resume:UploadFile=File(...)) -> ResumeQuestionsRe
         return generate_resume_questions(resume_text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@app.post("/api/v1/chat")
+async def chat_with_ai(
+    message : str = Form(...),
+    history : str = Form("[]"),
+    file : UploadFile = File(None)
+):
+    try:
+        file_bytes = None
+        if file:
+            safe_filename = file.filename or ""
+            if not safe_filename.endswith(".pdf"):
+                raise HTTPException (status_code=400,detail="Only pdf files are currently supported in chat.")
+            file_bytes = await file.read()
+        
+        ai_response  = process_chat_message(
+            new_message=message,
+            history_json=history,
+            file_bytes=file_bytes
+        )
+        return {"response":ai_response}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+    
+

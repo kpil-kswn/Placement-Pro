@@ -30,37 +30,36 @@ export default function ATSPage() {
     formData.append("job_description", jobDesc);
 
     try {
-        const res = await fetch("/api/ats", {
-      method: "POST",
-      body: formData,
-    });
+      const res = await fetch("/api/ats", {
+        method: "POST",
+        body: formData,
+      });
 
-    const rawData = await res.json();
+      const rawData = await res.json();
 
-    if (res.ok) {
-      let finalResult = rawData;
-      if (rawData.data) finalResult = rawData.data;
-      else if (rawData.response) finalResult = rawData.response;
+      if (res.ok) {
+        let finalResult = rawData;
+        if (rawData.data) finalResult = rawData.data;
+        else if (rawData.response) finalResult = rawData.response;
 
-      if (typeof finalResult === "string") {
-        try {
-          finalResult = JSON.parse(finalResult);
-        } catch (e) {
-          console.error("Failed to parse AI string into JSON", e);
+        if (typeof finalResult === "string") {
+          try {
+            finalResult = JSON.parse(finalResult);
+          } catch (e) {
+            console.error("Failed to parse AI string into JSON", e);
+          }
         }
+        setResult(finalResult);
+        setLoading(false);
+      } else {
+        setError(rawData.error || "Something went wrong.");
+        setLoading(false);
       }
-      setResult(finalResult);
-      setLoading(false)
-    } else {
-      setError(rawData.error || "Something went wrong.");
-      setLoading(false)
+    } catch (error) {
+      console.log(error);
+      setError("Network Error. Please try again.");
+      setLoading(false);
     }
-    } catch (error){
-      console.log(error)
-      setError("Network Error. Please try again.")
-      setLoading(false)
-    }
-    
   };
 
   return (

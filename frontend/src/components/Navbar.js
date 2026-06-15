@@ -8,15 +8,15 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center justify-start">
           {/* <Logo className="w-25" /> */}
-          <div className="text-2xl font-bold tracking-tighter text-gray-900">
+          <Link href="/" className="text-2xl font-bold tracking-tighter text-gray-900">
             PlacementPro
-          </div>
+          </Link>
         </div>
 
         <div className="flex items-center gap-8 font-bold">
           <Link href="/ats">ATS</Link>
           <Link href="/chat">Chat With AI</Link>
-          <Link href="/mocktest">MockTest</Link>
+          <Link href="/mock-test">MockTest</Link>
           <Link href="/interview">AI Interview</Link>
           <button className="bg-gray-900 text-white px-6 py-2.5 rounded-full font-medium text-sm hover:bg-gray-800 transition-colors">
             Sign In
