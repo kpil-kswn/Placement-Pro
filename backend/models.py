@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel,Field
+from typing import List,Optional
 
 class ATSResult(BaseModel):
     match_score:int
@@ -15,4 +15,3 @@ class InterViewQuestion(BaseModel):
 class ResumeQuestionsResult(BaseModel):
     total_questions:int
     questions:List[InterViewQuestion]
-

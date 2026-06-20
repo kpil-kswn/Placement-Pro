@@ -5,6 +5,7 @@ from models import ATSResult,ResumeQuestionsResult
 from services.question_generator import generate_resume_questions
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from routers.test_router import router as assessment_router
 import os
 load_dotenv()
 
@@ -18,6 +19,7 @@ app.add_middleware(
     allow_methods = ["*"],
     allow_headers = ["*"]
 )
+app.include_router(assessment_router)
 
 @app.post("/api/v1/ats/scan",response_model=ATSResult)
 async def scan_resume(resume:UploadFile=File(...),

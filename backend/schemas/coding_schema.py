@@ -1,0 +1,14 @@
+from pydantic import BaseModel,Field
+from typing import List
+
+class TestCase(BaseModel):
+    input_data:str=Field(...,description="The exact raw string input to evaluate.")
+    expected_output:str=Field(...,description="The exact expected stdout or return value.")
+
+class CodingProblemGeneration(BaseModel):
+    title:str=Field(...,description="A clear, professional title for the algorithmic challenge.")
+    difficulty:str=Field(...,description="Must be exactly: 'Easy', 'Medium', or 'Hard'.")
+    problem_statement:str=Field(...,description="The full problem description in Markdown format. Include constraints.")
+    starter_code:str=Field(...,description="The initial Python function definition with a 'pass' or 'return' placeholder.")
+    public_test_cases:List[TestCase]=Field(...,description="1 to 2 basic test cases that will be visible to the user on the UI.")
+    hidden_test_cases:List[TestCase]=Field(...,description="3 to 5 complex edge cases used strictly by the backend for secure grading.")
