@@ -5,8 +5,9 @@ from models import ATSResult,ResumeQuestionsResult
 from services.question_generator import generate_resume_questions
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from routers.test_router import router as assessment_router
+from routers.aptech_router import router as aptech_router
 import os
+from routers.coding_router import router as coding_router
 load_dotenv()
 
 app = FastAPI(title="PlacementPro Backend")
@@ -19,7 +20,8 @@ app.add_middleware(
     allow_methods = ["*"],
     allow_headers = ["*"]
 )
-app.include_router(assessment_router)
+app.include_router(aptech_router)
+app.include_router(coding_router)
 
 @app.post("/api/v1/ats/scan",response_model=ATSResult)
 async def scan_resume(resume:UploadFile=File(...),

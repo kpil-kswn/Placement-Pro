@@ -17,7 +17,7 @@ export default function Navbar() {
           <Link href="/ats">ATS</Link>
           <Link href="/chat">Chat With AI</Link>
           <Link href="/mock-test">MockTest</Link>
-          <Link href="/interview">AI Interview</Link>
+          <Link href="/interview/codingtest">AI Interview</Link>
           <button className="bg-gray-900 text-white px-6 py-2.5 rounded-full font-medium text-sm hover:bg-gray-800 transition-colors">
             Sign In
           </button>

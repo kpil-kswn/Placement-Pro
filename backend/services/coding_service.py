@@ -4,6 +4,7 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 from schemas.coding_schema import CodingProblemGeneration
+import time
 
 load_dotenv()
 client = genai.Client(api_key=os.getenv('GEMINI_API'))
@@ -34,23 +35,31 @@ async def generate_coding_problem(resume_text:Optional[str]=None)->CodingProblem
         
     Ensure the hidden test cases include challenging edge cases (empty arrays, negative numbers, extreme values).
     """
-
-    try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=CodingProblemGeneration,
-                temperature=0.7
+    max_retries = 3
+    for attemp in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=CodingProblemGeneration,
+                    temperature=0.7
+                )
             )
-        )
-        response_text = response.text
-        if not response_text:
-            raise ValueError("The AI model failed to return a valid response")
-        return CodingProblemGeneration.model_validate_json(response_text)
+            response_text = response.text
+            if not response_text:
+                raise ValueError("The AI model failed to return a valid response")
+            return CodingProblemGeneration.model_validate_json(response_text)
     
-    except Exception as e:
-        print(f"Error generating coding problem:{e}")
-        raise e
+        except Exception as e:
+            error_message=str(e)
+            if "503" in error_message or "UNAVAILABLE" in error_message:
+                if attemp < max_retries-1:
+                    sleep_time = 2**(attemp+1)
+                    print(f"API busy (503). Retrying question generator in {sleep_time} second...")
+                    time.sleep(sleep_time)
+                    continue
+            raise e
+    raise Exception("Max tries excceded.AI evaluation services are currently Unavailable.")
     

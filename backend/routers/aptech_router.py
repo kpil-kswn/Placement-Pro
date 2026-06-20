@@ -1,9 +1,9 @@
 from fastapi import FastAPI,HTTPException,Body,APIRouter
 from schemas.apti_schema import AssessmentTestResponse,TestSubmissionRequest,TestEvaluationResponse,QuestionEvaluationResult
-from services.test_service import generate_assessment_test
+from services.aptech_service import generate_assessment_test
 from typing import Optional
 
-router = APIRouter(prefix="/api/v1/assessment",tags=["Assessment Test Engine"])
+router = APIRouter(prefix="/api/v1/assessment",tags=["Aptitude and Technical Test"])
 
 @router.post("/generate",response_model=AssessmentTestResponse)
 async def create_new_test(

@@ -4,6 +4,7 @@ from typing import Optional
 from google.genai import types
 from dotenv import load_dotenv
 from schemas.apti_schema import AssessmentTestResponse
+import time
 
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API"))
@@ -28,22 +29,31 @@ async def generate_assessment_test(resume_text: Optional[str]=None)->AssessmentT
     - Assign the correct_option field exactly as one of these strings: "A", "B", "C", or "D".
     - Ensure questions range from medium to high difficulty.
     """
-
-    try:
-        response = client.models.generate_content(
+    max_retries = 3
+    for attemp in range(max_retries):
+        try:
+            response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=AssessmentTestResponse,
                 temperature=0.7
+                )
             )
-        )
-        response_text = response.text
-        if not response_text:
-            raise ValueError("The AI model failed to return a valid response")
+            response_text = response.text
+            if not response_text:
+                raise ValueError("The AI model failed to return a valid response")
         
-        return AssessmentTestResponse.model_validate_json(response_text)
-    except Exception as e:
-        print(f"Error compiling evaluation questions:{e}")
-        raise e
+            return AssessmentTestResponse.model_validate_json(response_text)
+        
+        except Exception as e:
+            error_message=str(e)
+            if "503" in error_message or "UNAVAILABLE" in error_message:
+                if attemp < max_retries-1:
+                    sleep_time = 2**(attemp+1)
+                    print(f"API busy (503). Retrying question generator in {sleep_time} second...")
+                    time.sleep(sleep_time)
+                    continue
+            raise e
+    raise Exception("Max tries excceded.AI evaluation services are currently Unavailable.")
