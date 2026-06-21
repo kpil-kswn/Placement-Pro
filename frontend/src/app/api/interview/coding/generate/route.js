@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-
 export async function POST(request){
     try{
         const body = await request.json().catch(()=>({}));
@@ -12,7 +11,7 @@ export async function POST(request){
         },
         body:JSON.stringify(resumeText?{resume_text:resumeText}:{})
         })
-        const data = response.json();
+        const data = await response.json();
         if(!response.ok){
             return NextResponse.json(
                 {error: data.detail || "FastAPI Error"},

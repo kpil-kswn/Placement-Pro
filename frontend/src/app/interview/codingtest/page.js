@@ -1,48 +1,86 @@
-"use client";
-import { useState,useEffect } from "react";
-import { Editor } from "@monaco-editor/react";
+'use client';
 
-export default function Codingtest() {
-  const [problemData, setProblemData] = useState(null);
-  const [userCode,setUserCode] = useState("")
-  const [loading,setLoading] = useState(true);
+import { useState, useEffect, useRef } from 'react';
+import Editor from '@monaco-editor/react';
+import ReactMarkdown from 'react-markdown';
 
-  useEffect(()=>{
-    const fetchProblem = async()=>{
-        try{
-            const res = await fetch('/api/interview/coding/generate',{
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({resume_test:"Data structure and algorithams"})
-            });
-            const data = await res.json();
-            setProblemData(data)
-            setUserCode(data.starter_code)
-        }catch (error){
-            console.error("Failed to fetch problem:",error)
-        } finally{
-            setLoading(false);
+export default function InterviewPage() {
+    const [problemData, setProblemData] = useState(null);
+    const [userCode, setUserCode] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [theme, setTheme] = useState("vs-dark");
+    const [language, setLanguage] = useState("python");
+    const [editorMode, setEditorMode] = useState("standard"); // See note below about Vim
+    const editorRef = useRef(null);
+
+    useEffect(() => {
+        const fetchProblem = async () => {
+            try {
+                const res = await fetch('/api/interview/coding/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resume_text: "Python developer" }) 
+                });
+                
+                const data = await res.json();
+                
+                if (data.error || data.detail) {
+                    console.error("Backend Error:", data.error || data.detail);
+                }
+
+                setProblemData(data);
+                setUserCode(data.starter_code || "");
+            } catch (error) {
+                console.error("Failed to fetch problem:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProblem();
+    }, []);
+
+    const handleEditorDidMount = (editor, monaco) => {
+        editorRef.current = editor;
+    };
+
+    const handleResetCode = () => {
+        if (confirm("Are you sure you want to reset your code to the starter template?")) {
+            setUserCode(problemData.starter_code);
         }
     };
-    fetchProblem();
-  },[]);
 
-  const handleRunCode = () => {
-        // Placeholder for Step 3: Sending code to backend for Piston execution
-        console.log("Submitting code:", userCode);
-        alert("Code execution backend integration coming next!");
+    const handleRunCode = () => {
+        console.log("Running public test cases for:", language);
+        alert("Running public test cases! (Backend integration next)");
+    };
+
+    const handleSubmitCode = () => {
+        console.log("Submitting all test cases for:", language);
+        alert("Submitting for final grading! (Backend integration next)");
+    };
+
+    const editorOptions = {
+        minimap: { enabled: false },
+        fontSize: 14,
+        wordWrap: "on",
+        quickSuggestions: true,
+        suggestOnTriggerCharacters: true,
+        parameterHints: { enabled: true },
+        autoClosingBrackets: "always",
+        autoClosingQuotes: "always",
+        formatOnPaste: true,
     };
 
     if (loading) {
-        return <div className="flex h-screen items-center justify-center">Generating AI Coding Assessment...</div>;
+        return <div className="flex h-screen items-center justify-center bg-gray-50 font-semibold text-lg">Generating AI Coding Assessment...</div>;
     }
 
     if (!problemData) {
-        return <div className="flex h-screen items-center justify-center text-red-500">Error loading problem.</div>;
+        return <div className="flex h-screen items-center justify-center text-red-500">Error loading problem. Check your terminal.</div>;
     }
 
-    
-  return (
+    return (
         <div className="flex h-screen w-full bg-gray-50">
             
             {/* LEFT PANEL: Problem Statement */}
@@ -57,17 +95,16 @@ export default function Codingtest() {
                     </span>
                 </div>
                 
-                {/* Note: In a production app, use 'react-markdown' to render this properly */}
-                <div className="prose max-w-none whitespace-pre-wrap">
-                    {problemData.problem_statement}
+                <div className="prose max-w-none text-gray-800">
+                    <ReactMarkdown>{problemData.problem_statement}</ReactMarkdown>
                 </div>
 
                 <div className="mt-8">
-                    <h3 className="font-semibold text-lg mb-2">Public Test Cases:</h3>
+                    <h3 className="font-semibold text-lg mb-4 text-gray-900">Public Test Cases:</h3>
                     {problemData.public_test_cases?.map((tc, index) => (
-                        <div key={index} className="bg-gray-100 p-4 rounded mb-2 font-mono text-sm">
-                            <div><strong>Input:</strong> {tc.input_data}</div>
-                            <div><strong>Expected Output:</strong> {tc.expected_output}</div>
+                        <div key={index} className="bg-gray-100 p-4 rounded-lg mb-3 font-mono text-sm border border-gray-200 shadow-sm">
+                            <div className="mb-2"><strong className="text-gray-700">Input:</strong> <span className="text-blue-600">{tc.input_data}</span></div>
+                            <div><strong className="text-gray-700">Expected Output:</strong> <span className="text-green-600">{tc.expected_output}</span></div>
                         </div>
                     ))}
                 </div>
@@ -75,29 +112,80 @@ export default function Codingtest() {
 
             {/* RIGHT PANEL: Monaco Editor */}
             <div className="w-1/2 flex flex-col bg-[#1e1e1e]">
-                <div className="flex justify-between items-center p-4 bg-gray-800 text-white">
-                    <span className="font-mono text-sm">main.py</span>
+                
+                {/* EDITOR TOOLBAR */}
+                <div className="flex justify-between items-center p-3 bg-gray-900 text-gray-300 text-sm border-b border-gray-700">
+                    <div className="flex gap-4">
+                        {/* Language Selector */}
+                        <select 
+                            value={language} 
+                            onChange={(e) => setLanguage(e.target.value)}
+                            className="bg-gray-800 border border-gray-600 rounded px-2 py-1 outline-none hover:border-gray-500 transition-colors"
+                        >
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="cpp">C++</option>
+                            <option value="java">Java</option>
+                        </select>
+
+                        {/* Theme Selector */}
+                        <select 
+                            value={theme} 
+                            onChange={(e) => setTheme(e.target.value)}
+                            className="bg-gray-800 border border-gray-600 rounded px-2 py-1 outline-none hover:border-gray-500 transition-colors"
+                        >
+                            <option value="vs-dark">Dark Theme</option>
+                            <option value="light">Light Theme</option>
+                        </select>
+
+                        {/* Editor Mode Selector */}
+                        <select 
+                            value={editorMode} 
+                            onChange={(e) => setEditorMode(e.target.value)}
+                            className="bg-gray-800 border border-gray-600 rounded px-2 py-1 outline-none hover:border-gray-500 transition-colors"
+                        >
+                            <option value="standard">Standard Mode</option>
+                            <option value="vim">Vim Mode</option>
+                        </select>
+                    </div>
+
                     <button 
-                        onClick={handleRunCode}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-semibold transition-colors"
+                        onClick={handleResetCode}
+                        className="hover:text-white transition-colors flex items-center gap-1"
+                        title="Reset to starter code"
                     >
-                        Run Code
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        Reset
                     </button>
                 </div>
                 
-                <div className="flex-grow">
+                {/* MONACO EDITOR */}
+                <div className="grow relative">
                     <Editor
                         height="100%"
-                        defaultLanguage="python"
-                        theme="vs-dark"
+                        language={language}
+                        theme={theme}
                         value={userCode}
                         onChange={(value) => setUserCode(value)}
-                        options={{
-                            minimap: { enabled: false },
-                            fontSize: 14,
-                            wordWrap: "on",
-                        }}
+                        onMount={handleEditorDidMount}
+                        options={editorOptions}
                     />
+                </div>
+
+                {/* BOTTOM ACTION BAR */}
+                <div className="flex justify-end gap-3 p-4 bg-gray-900 border-t border-gray-700">
+                    <button 
+                        onClick={handleRunCode}
+                        className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors border border-gray-600"
+                    >
+                        Run Code
+                    </button>
+                    <button 
+                        onClick={handleSubmitCode}
+                        className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-green-900/20"
+                    >
+                        Submit Code
+                    </button>
                 </div>
             </div>
 

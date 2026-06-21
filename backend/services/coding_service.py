@@ -22,7 +22,9 @@ async def generate_coding_problem(resume_text:Optional[str]=None)->CodingProblem
     CRITICAL INSTRUCTIONS FOR TEST CASES:
     Because these test cases will be executed in an automated Python sandbox, you MUST format the inputs and outputs exactly as raw Python values.
     
-    - starter_code: Must be a valid Python function definition (e.g., `def find_max(arr):\\n    pass`).
+    - starter_code: Must be ONLY the initial Python function definition with a `pass` or `return` placeholder. 
+      CRITICAL: DO NOT write the actual solution, algorithm, or any helper functions. ONLY provide the bare signature.
+      Example of valid starter_code: `def solve_problem(arr, target):\n    return`
     - input_data: Must be written EXACTLY as comma-separated arguments that will be passed into the function. 
       Examples of valid input_data:
         - `[1, 2, 3], 5`  (for a function taking a list and an int)
