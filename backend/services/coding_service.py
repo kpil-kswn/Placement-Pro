@@ -41,7 +41,7 @@ async def generate_coding_problem(resume_text:Optional[str]=None)->CodingProblem
     for attemp in range(max_retries):
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-2.0-flash',
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
@@ -54,6 +54,42 @@ async def generate_coding_problem(resume_text:Optional[str]=None)->CodingProblem
                 raise ValueError("The AI model failed to return a valid response")
             return CodingProblemGeneration.model_validate_json(response_text)
     
+        except Exception as e:
+            error_message=str(e)
+            if "503" in error_message or "UNAVAILABLE" in error_message:
+                if attemp < max_retries-1:
+                    sleep_time = 2**(attemp+1)
+                    print(f"API busy (503). Retrying question generator in {sleep_time} second...")
+                    time.sleep(sleep_time)
+                    continue
+            raise e
+    raise Exception("Max tries excceded.AI evaluation services are currently Unavailable.")
+    
+async def generate_code_critique(source_code:str)->str:
+    prompt = f"""
+    You are an expert Senior Software Engineer interviewing a candidate.
+    Review the following Python code submission.
+    
+    Provide a short, professional critique (maximum 3-4 sentences).
+    1. State the likely Big-O Time and Space complexity.
+    2. Mention one specific area for improvement (e.g., variable naming, edge case handling, or a more efficient built-in function). 
+    If the code is perfect, praise its elegance.
+
+    Candidate Code:
+    {source_code}
+    """
+    max_retries = 3
+    for attemp in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=prompt,
+            )
+            response_text = response.text
+            if not response_text:
+                raise ValueError("Gemini returned no critique text")
+            
+            return response_text
         except Exception as e:
             error_message=str(e)
             if "503" in error_message or "UNAVAILABLE" in error_message:

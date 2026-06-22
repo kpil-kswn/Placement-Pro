@@ -16,7 +16,8 @@ class CodingProblemGeneration(BaseModel):
 class CodeSubmission(BaseModel):
     source_code:str=Field(...,description="The user's submitted python code")
     test_case:List[TestCase] =Field(...,description="The hidden and public test cases to evaluate against")
-
+    is_submit:bool = Field(default=False,description="True if final submission, False if just running public tests.")
+    
 class EvaluationResult(BaseModel):
     status:str = Field(...,description="Passed,Failed,Error")
     passed_cases:int
