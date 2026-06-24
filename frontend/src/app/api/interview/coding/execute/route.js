@@ -11,7 +11,7 @@ export async function POST(request) {
         })
         const rawText = await response.text()
         if(!response.ok){
-            return NextResponse.json({error:"Execution errro",detail:rawText},{status:response.status})
+            return NextResponse.json({error:"Execution error",detail:rawText},{status:response.status})
         }
         return NextResponse.json(JSON.parse(rawText))
     } catch (error){

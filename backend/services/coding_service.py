@@ -41,7 +41,7 @@ async def generate_coding_problem(resume_text:Optional[str]=None)->CodingProblem
     for attemp in range(max_retries):
         try:
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model='gemini-2.5-flash',
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
@@ -82,7 +82,7 @@ async def generate_code_critique(source_code:str)->str:
     for attemp in range(max_retries):
         try:
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model='gemini-2.5-flash',
                 contents=prompt,
             )
             response_text = response.text

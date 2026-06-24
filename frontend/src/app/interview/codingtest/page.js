@@ -53,7 +53,7 @@ export default function InterviewPage() {
         ? [...problemData.public_test_cases, ...problemData.hidden_test_cases]
         : problemData.public_test_cases;
 
-      const res = await fetch("/api/coding/execute", {
+      const res = await fetch("/api/interview/coding/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
