@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from routers.aptech_router import router as aptech_router
 import os
+from routers import interview_router
 from routers.coding_router import router as coding_router
 load_dotenv()
 
@@ -22,6 +23,7 @@ app.add_middleware(
 )
 app.include_router(aptech_router)
 app.include_router(coding_router)
+app.include_router(interview_router.router,tags=["AI Voice Interview"])
 
 @app.post("/api/v1/ats/scan",response_model=ATSResult)
 async def scan_resume(resume:UploadFile=File(...),
