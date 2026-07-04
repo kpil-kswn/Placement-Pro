@@ -110,3 +110,5 @@ async def interview_chat(request: ChatRequest):
     except Exception as e:
         print(f"Chat Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+ 
