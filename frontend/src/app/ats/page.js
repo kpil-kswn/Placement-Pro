@@ -63,7 +63,7 @@ export default function ATSPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex justify-center pt-32 pb-12 px-6">
+    <main className="flex-1 bg-gray-50 flex justify-center py-8 px-6 w-full">
       <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 h-[750px]">
         <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col h-full">
           <div className="mb-8">

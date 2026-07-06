@@ -21,7 +21,7 @@ export default function MockTestPage() {
     setLoading(true);
     setError("");
     setQuestions([]);
-    
+
     const formData = new FormData();
     formData.append("resume", file);
 
@@ -35,26 +35,27 @@ export default function MockTestPage() {
 
       if (res.ok) {
         let finalResult = rawData;
-        if(rawData.data) finalResult = rawData.data;
-        else if(rawData.response) finalResult = rawData.response;
+        if (rawData.data) finalResult = rawData.data;
+        else if (rawData.response) finalResult = rawData.response;
 
-        if(typeof finalResult === "string"){
-            try{
-                finalResult = JSON.parse(finalResult);
-            }catch(e){
-                console.log("Parse error", e);
-            }
+        if (typeof finalResult === "string") {
+          try {
+            finalResult = JSON.parse(finalResult);
+          } catch (e) {
+            console.log("Parse error", e);
+          }
         }
-        if(finalResult.questions && Array.isArray(finalResult.questions)){
-            setQuestions(finalResult.questions);
+        if (finalResult.questions && Array.isArray(finalResult.questions)) {
+          setQuestions(finalResult.questions);
         } else {
-            setError("Received an unexpected data format from the AI");
+          setError("Received an unexpected data format from the AI");
         }
-
       } else {
         let safeError = rawData.error;
         if (typeof safeError === "object") {
-           safeError = Array.isArray(safeError) ? safeError[0]?.msg : JSON.stringify(safeError);
+          safeError = Array.isArray(safeError)
+            ? safeError[0]?.msg
+            : JSON.stringify(safeError);
         }
         setError(safeError || "Failed to generate questions.");
       }
@@ -62,18 +63,14 @@ export default function MockTestPage() {
       console.log(error);
       setError(error.message || "Network Error please try again..");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    // 1. Removed max width constraints and added horizontal padding
-    <main className="min-h-screen bg-gray-50 pt-28 pb-24 px-4 md:px-8 w-full">
+    <main className="flex-1 bg-gray-50 py-8 px-4 md:px-8 w-full">
       <div className="w-full flex flex-col gap-6">
-        
-        {/* Top Section: Compact Horizontal Control Bar */}
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 w-full">
-          
           <div className="flex-shrink-0 text-center md:text-left">
             <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
               Interview Prep
@@ -84,7 +81,6 @@ export default function MockTestPage() {
           </div>
 
           <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto flex-grow justify-end">
-            
             {/* Extremely compact file input row */}
             <div className="w-full md:w-96 relative border-2 border-dashed border-gray-300 hover:border-indigo-400 bg-gray-50 hover:bg-white rounded-xl h-12 flex items-center justify-center transition-all px-4">
               <input
@@ -123,7 +119,7 @@ export default function MockTestPage() {
         {(loading || questions.length > 0) && (
           <div className="bg-gray-900 rounded-3xl p-8 md:p-10 text-white shadow-xl flex flex-col relative overflow-hidden min-h-[500px]">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-indigo-500 rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
-            
+
             {loading && (
               <div className="flex-grow flex items-center justify-center z-10 animate-pulse text-indigo-300 font-medium tracking-wide text-lg h-full">
                 Processing document structure and generating questions...
@@ -144,23 +140,25 @@ export default function MockTestPage() {
                 {/* Grid Layout: 1 col on mobile, 2 on tablet, 3 on wide desktop */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {questions.map((q, i) => (
-                    <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors flex flex-col h-full">
-                      
+                    <div
+                      key={i}
+                      className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors flex flex-col h-full"
+                    >
                       {/* Top Row: Category Badge & Number */}
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-indigo-400 font-black text-xl opacity-50">
-                          {(i + 1).toString().padStart(2, '0')}
+                          {(i + 1).toString().padStart(2, "0")}
                         </span>
                         <span className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
                           {q.category}
                         </span>
                       </div>
-                      
+
                       {/* Middle: The actual question */}
                       <p className="text-base text-gray-100 leading-relaxed font-medium mb-6 flex-grow">
                         {q.question}
                       </p>
-                      
+
                       {/* Bottom: Why Asked Insight */}
                       <div className="border-t border-white/10 pt-4 mt-auto">
                         <p className="text-xs text-gray-400 leading-relaxed">
@@ -170,7 +168,6 @@ export default function MockTestPage() {
                           {q.why_asked}
                         </p>
                       </div>
-
                     </div>
                   ))}
                 </div>

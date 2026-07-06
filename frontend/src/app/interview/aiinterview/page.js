@@ -147,7 +147,7 @@ export default function AIInterviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-6">
+    <div className="flex-1 bg-gray-900 text-white flex flex-col items-center py-8 px-6 w-full">
       <audio
         ref={audioRef}
         className="hidden"

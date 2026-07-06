@@ -1,5 +1,6 @@
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Providers from "@/components/Providers";
 
 export const metadata = {
   title: "Placement Pro",
@@ -8,10 +9,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
-        <Navbar/>
-        <div className="grow">{children}</div>
+    <html lang="en">
+      <body className="min-h-screen flex flex-col antialiased bg-white">
+        <Providers>
+          <Navbar />
+          <div className="flex-1 flex flex-col">
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   );
