@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { getPartialLayoutVaryPath } from "next/dist/client/components/segment-cache/vary-path";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -22,9 +21,7 @@ async function ConnectMongo() {
       bufferCommands: false,
     };
 
-    cached.promise = (
-      await mongoose.connect(MONGODB_URI, opts)
-    ).then((mongoose) => {
+    cached.promise = (mongoose.connect(MONGODB_URI, opts)).then((mongoose) => {
       console.log("MongoDB Connected Successfully");
       return mongoose;
     });

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { resolve } from "styled-jsx/css";
 
 export default function AIInterviewPage() {
   const [messages, setMessages] = useState([]);
