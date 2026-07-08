@@ -16,10 +16,13 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    authProvider: {
-      type: String,
-      enum: ["google", "credentials", "both"],
-      default: "google",
+    image:{
+      type:String,
+      required:false,
+    },
+    isPro:{
+      type:Boolean,
+      default:false,
     },
     resumeText: {
       type: String,

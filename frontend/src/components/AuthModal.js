@@ -14,10 +14,7 @@ export default function AuthModal({ isOpen, onClose }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   
-  // 1. Check if they need a password
   const forcePasswordMode = session?.user?.requiresPassword === true;
-  
-  // 2. Check if they are logged out AND trying to access a protected page (not the homepage)
   const isProtectedRoute = pathname !== "/";
   const forceLoginMode = status === "unauthenticated" && isProtectedRoute;
 
@@ -27,7 +24,6 @@ export default function AuthModal({ isOpen, onClose }) {
 
   if (!mounted) return null;
 
-  // 3. The modal stays open if manually triggered, if needing a password, OR if on a protected route while logged out
   const modalIsOpen = isOpen || forcePasswordMode || forceLoginMode;
   if (!modalIsOpen) return null;
 
@@ -46,7 +42,7 @@ export default function AuthModal({ isOpen, onClose }) {
   };
 
   const handleGoogleAuth = async () => {
-    await signIn("google", { callbackUrl: pathname }); // Return them exactly to the page they were trying to access
+    await signIn("google", { callbackUrl: pathname });
   };
 
   const handleSaveNewPassword = async (e) => {
@@ -69,8 +65,6 @@ export default function AuthModal({ isOpen, onClose }) {
       alert("Something went wrong");
     }
   };
-
-  // Determine if we should hide the close button (Force modes)
   const isForcedMode = forcePasswordMode || forceLoginMode;
 
   const modalContent = (
@@ -208,6 +202,5 @@ export default function AuthModal({ isOpen, onClose }) {
       </div>
     </div>
   );
-
   return createPortal(modalContent, document.body);
 }

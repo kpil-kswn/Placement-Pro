@@ -45,8 +45,11 @@ export const authOptions = {
                     await User.create({
                         name: user.name,
                         email: user.email,
-                        authProvider: "google",
+                        image:user.image,
                     });
+                }else if(!existingUser.image && user.image){
+                    existingUser.image = user.image;
+                    await existingUser.save()
                 }
             }
             return true;
@@ -60,7 +63,9 @@ export const authOptions = {
                 const dbUser = await User.findOne({ email: user.email });
                 if (dbUser) {
                     token.id = dbUser._id.toString();
-                    token.requiresPassword = !dbUser.password; 
+                    token.requiresPassword = !dbUser.password;
+                    token.image = dbUser.image
+                    token.isPro = dbUser.isPro 
                 }
             }
             return token;
@@ -69,6 +74,8 @@ export const authOptions = {
             if (session?.user) {
                 session.user.id = token.id;
                 session.user.requiresPassword = token.requiresPassword; 
+                session.user.image = token.image
+                session.user.isPro = token.isPro
             }
             return session;
         }
