@@ -8,7 +8,6 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -26,17 +25,15 @@ export default function ChatPage() {
     e.preventDefault();
     if (!input.trim() && !file) return;
 
-    // 1. Add user message to UI immediately
     const userMessage = { role: "user", text: input };
-    const currentHistory = [...messages]; // Capture history BEFORE adding the new message
+    const currentHistory = [...messages]; 
     setMessages([...currentHistory, userMessage]);
     setInput("");
     setLoading(true);
 
-    // 2. Prepare FormData
     const formData = new FormData();
     formData.append("message", userMessage.text);
-    formData.append("history", JSON.stringify(currentHistory)); // Send previous context
+    formData.append("history", JSON.stringify(currentHistory)); 
     if (file) {
       formData.append("file", file);
     }
@@ -86,7 +83,7 @@ export default function ChatPage() {
         </div>
 
         {/* Chat History Area */}
-        <div className="flex-grow overflow-y-auto p-6 space-y-6 bg-gray-50/50">
+        <div className="grow overflow-y-auto p-6 space-y-6 bg-gray-50/50">
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-gray-400">
               <span className="text-4xl mb-4">👋</span>
@@ -106,7 +103,6 @@ export default function ChatPage() {
                     : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm"
                 }`}
               >
-                {/* Renders line breaks properly */}
                 {msg.text.split("\n").map((line, i) => (
                   <span key={i}>
                     {line}
@@ -129,9 +125,7 @@ export default function ChatPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
         <div className="bg-white border-t border-gray-100 p-4">
-          {/* Show selected file indicator */}
           {file && (
             <div className="mb-3 flex items-center justify-between bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg text-sm border border-indigo-100 w-fit">
               <span className="truncate max-w-xs pr-4">📎 {file.name}</span>
@@ -146,7 +140,7 @@ export default function ChatPage() {
 
           <form onSubmit={handleSendMessage} className="flex gap-3">
             {/* File Upload Button */}
-            <label className="flex-shrink-0 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-600 w-12 h-12 flex items-center justify-center rounded-xl transition-colors">
+            <label className="shrink-0 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-600 w-12 h-12 flex items-center justify-center rounded-xl transition-colors">
               <input
                 type="file"
                 accept=".pdf"
@@ -174,17 +168,17 @@ export default function ChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Message the assistant..."
-              className="flex-grow bg-gray-50 border border-gray-200 rounded-xl px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-gray-800"
+              className="grow bg-gray-50 border border-gray-200 rounded-xl px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-gray-800"
             />
 
             {/* Send Button */}
             <button
               type="submit"
               disabled={loading || (!input.trim() && !file)}
-              className="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white w-12 h-12 flex items-center justify-center rounded-xl transition-colors shadow-sm"
+              className="shrink-0 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white w-12 h-12 flex items-center justify-center rounded-xl transition-colors shadow-sm"
             >
               <svg
-                className="w-5 h-5 translate-x-[-1px] translate-y-[1px]"
+                className="w-5 h-5 -translate-x-px translate-y-px"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >

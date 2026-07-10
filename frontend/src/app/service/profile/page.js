@@ -13,17 +13,14 @@ export default function ProfilePage() {
   if (status === "unauthenticated") {
     redirect("/");
   }
-
   if (status === "loading") {
     return <div className="flex-1 flex items-center justify-center min-h-screen text-gray-500 font-bold">Loading Profile...</div>;
   }
-
   const extractTextFromPDF = async (pdfFile) => {
-
     const pdfjsLib = await import("pdfjs-dist/build/pdf.mjs");
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
     const arrayBuffer = await pdfFile.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+    const pdf = await pdfjsLib.getDocument({data:arrayBuffer}).promise;
     let fullText = "";
 
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
@@ -41,9 +38,9 @@ export default function ProfilePage() {
     
     setIsUploading(true);
     setUploadSuccess(false);
-
     try {
       const extractedText = await extractTextFromPDF(file);
+      // console.log(extractedText)
       const res = await fetch("/api/user/resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
