@@ -57,3 +57,11 @@ def process_chat_message(new_message:str,history_json:str,file_bytes:bytes|None 
             raise e
     raise Exception("Max tries excceded.AI evaluation services are currently Unavailable.")
     
+def generate_chat_title(user_message:str)->str:
+    try:
+        chat = client.chats.create(model='gemini-2.5-flash')
+        prompt = f"Summarize this prompt in 3 to 5 words for a chat sidebar title. Do not use quotes.Prompt:{user_message}"
+        response = chat.send_message(prompt)
+        return response.text.strip()
+    except Exception:
+        return "New Conversation"

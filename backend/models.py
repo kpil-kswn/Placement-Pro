@@ -1,5 +1,6 @@
 from pydantic import BaseModel,Field
 from typing import List,Optional
+from datetime import datetime,timezone
 
 class ATSResult(BaseModel):
     match_score:int
@@ -15,3 +16,19 @@ class InterViewQuestion(BaseModel):
 class ResumeQuestionsResult(BaseModel):
     total_questions:int
     questions:List[InterViewQuestion]
+
+class Message(BaseModel):
+    role:str
+    text:str
+    timestamp:datetime = Field(default_factory=lambda:datetime.now(timezone.utc))
+
+class ChatSchema(BaseModel):
+    userId:str
+    title:str = "New Conversation"
+    messages : List[Message] = []
+    created_at:datetime = Field(default_factory=lambda:datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    class Config:
+        extra = "ignore"
+
+        
