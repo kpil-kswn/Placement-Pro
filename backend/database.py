@@ -13,5 +13,8 @@ db = client.test
 
 chats_collection = db.chats
 users_collection = db.users
+tests_collection = db.tests
+questions_collection = db.questions
+test_attempts_collection = db.test_attempts
 
 

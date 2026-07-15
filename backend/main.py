@@ -7,14 +7,14 @@ from dotenv import load_dotenv
 from fastapi import FastAPI,UploadFile,File,Form,HTTPException,Body
 from fastapi.middleware.cors import CORSMiddleware
 
-from models import ATSResult,ResumeQuestionsResult,Message,ChatSchema
+from models import ATSResult,Message,ChatSchema
 from services.ats_scanner import evaluate_resume_against_jd,extract_text_from_pdf
 from services.chat_service import process_chat_message,generate_chat_title
-from services.question_generator import generate_resume_questions
 
 from routers.aptech_router import router as aptech_router
 from routers import interview_router
 from routers.coding_router import router as coding_router
+from routers.mocktest_router import router as mocktest_router
 load_dotenv()
 
 app = FastAPI(title="PlacementPro Backend")
@@ -30,6 +30,7 @@ app.add_middleware(
 app.include_router(aptech_router)
 app.include_router(coding_router)
 app.include_router(interview_router.router,tags=["AI Voice Interview"])
+app.include_router(mocktest_router)
 
 @app.post("/api/v1/ats/scan",response_model=ATSResult)
 async def scan_resume(resume:UploadFile=File(...),
@@ -44,22 +45,6 @@ async def scan_resume(resume:UploadFile=File(...),
         return ats_analysis
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
-
-@app.post("/api/v1/resume/questions", response_model=ResumeQuestionsResult)
-async def get_resume_questions(resume:UploadFile=File(...)) -> ResumeQuestionsResult:
-    safe_filename = resume.filename or ""
-    if not safe_filename.endswith('.pdf'):
-        raise HTTPException(status_code=400,detail="Only PDF files are allowed")
-    file_bytes = await resume.read()
-    resume_text = extract_text_from_pdf(file_bytes)
-    if not resume_text.strip():
-        raise HTTPException(status_code=400, detail="Resume text content cannot be empty.")
-        
-    try:
-        return generate_resume_questions(resume_text)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
 
 # to list all chats for a user
 @app.get("/api/v1/chats/{user_id}")

@@ -1,181 +1,136 @@
 "use client";
-import { useState } from "react";
 
-export default function MockTestPage() {
-  const [file, setFile] = useState(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [questions, setQuestions] = useState([]);
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+export default function MockTestDashboard() {
+  const router = useRouter();
+  const [catalog, setCatalog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [startingTestId, setStartingTestId] = useState(null);
+
+  useEffect(() => {
+    async function fetchCatalog() {
+      try {
+        const response = await fetch("/api/mock-test/catalog");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to load tests.");
+        }
+
+        setCatalog(data.catalog);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
 
-  const handleGenerateQuestions = async () => {
-    if (!file) {
-      setError("Please upload your resume first.");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    setQuestions([]);
+    fetchCatalog();
+  } , []);
 
-    const formData = new FormData();
-    formData.append("resume", file);
-
+  const handleStartTest = async (testId) => {
+    setStartingTestId(testId);
     try {
-      const res = await fetch("/api/mock-test", {
+      
+      const response = await fetch("/api/mock-test/start", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ testId }),
       });
 
-      const rawData = await res.json();
+      const data = await response.json();
 
-      if (res.ok) {
-        let finalResult = rawData;
-        if (rawData.data) finalResult = rawData.data;
-        else if (rawData.response) finalResult = rawData.response;
-
-        if (typeof finalResult === "string") {
-          try {
-            finalResult = JSON.parse(finalResult);
-          } catch (e) {
-            console.log("Parse error", e);
-          }
-        }
-        if (finalResult.questions && Array.isArray(finalResult.questions)) {
-          setQuestions(finalResult.questions);
-        } else {
-          setError("Received an unexpected data format from the AI");
-        }
-      } else {
-        let safeError = rawData.error;
-        if (typeof safeError === "object") {
-          safeError = Array.isArray(safeError)
-            ? safeError[0]?.msg
-            : JSON.stringify(safeError);
-        }
-        setError(safeError || "Failed to generate questions.");
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to start test session.");
       }
-    } catch (error) {
-      console.log(error);
-      setError(error.message || "Network Error please try again..");
-    } finally {
-      setLoading(false);
+
+      sessionStorage.setItem("active_mock_test",JSON.stringify(data));
+
+      router.push(`/service/mock-test/${data.attempt_id}`);
+
+    } catch (err) {
+      alert(err.message);
+      setStartingTestId(null);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg font-medium text-gray-600 animate-pulse">Loading available mock tests...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto text-center">
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200">
+          <p className="font-semibold">Error Loading Dashboard</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <main className="flex-1 bg-gray-50 py-8 px-4 md:px-8 w-full">
-      <div className="w-full flex flex-col gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 w-full">
-          <div className="flex-shrink-0 text-center md:text-left">
-            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-              Interview Prep
-            </h1>
-            <p className="text-gray-500 text-sm mt-1">
-              Generate 30 technical questions from your resume.
-            </p>
-          </div>
+    <div className="p-6 max-w-6xl mx-auto">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Technical Mock Assessments</h1>
+        <p className="text-gray-600 mt-2">
+          Select a subject to validate your knowledge or try our specialized AI engine to simulate interviews built entirely around your resume.
+        </p>
+      </header>
 
-          <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto flex-grow justify-end">
-            {/* Extremely compact file input row */}
-            <div className="w-full md:w-96 relative border-2 border-dashed border-gray-300 hover:border-indigo-400 bg-gray-50 hover:bg-white rounded-xl h-12 flex items-center justify-center transition-all px-4">
-              <input
-                type="file"
-                accept=".pdf"
-                onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <span className="text-gray-600 text-sm font-medium truncate">
-                {file ? file.name : "📄 Click or drag PDF here"}
-              </span>
-            </div>
+      {/* Grid Layout for Test Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {catalog.map((test) => {
+          const isCustom = test.type === "resume_custom";
+          const isButtonLoading = startingTestId === test.id;
 
-            <button
-              onClick={handleGenerateQuestions}
-              disabled={loading}
-              className={`w-full md:w-auto h-12 px-8 rounded-xl text-white font-semibold shadow-md transition-all whitespace-nowrap ${
-                loading
-                  ? "bg-indigo-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700 hover:-translate-y-0.5"
+          return (
+            <div
+              key={test.id}
+              className={`flex flex-col justify-between p-6 rounded-xl border transition-all shadow-sm ${
+                isCustom
+                  ? "border-purple-200 bg-gradient-to-br from-purple-50 to-white hover:shadow-md"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
               }`}
             >
-              {loading ? "Analyzing..." : "Generate Questions"}
-            </button>
-          </div>
-        </div>
-
-        {/* Global Error Display */}
-        {error && (
-          <div className="bg-red-50 text-red-600 border border-red-100 rounded-xl p-4 text-sm font-medium text-center w-full">
-            {typeof error === "string" ? error : JSON.stringify(error)}
-          </div>
-        )}
-
-        {/* Bottom Section: Full-Width Results Area */}
-        {(loading || questions.length > 0) && (
-          <div className="bg-gray-900 rounded-3xl p-8 md:p-10 text-white shadow-xl flex flex-col relative overflow-hidden min-h-[500px]">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-indigo-500 rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
-
-            {loading && (
-              <div className="flex-grow flex items-center justify-center z-10 animate-pulse text-indigo-300 font-medium tracking-wide text-lg h-full">
-                Processing document structure and generating questions...
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  {test.title}
+                </h2>
+                <p className="text-gray-600 text-sm mt-3 line-clamp-3">
+                  {test.description}
+                </p>
               </div>
-            )}
 
-            {questions.length > 0 && !loading && (
-              <div className="z-10 w-full animate-fade-in flex flex-col">
-                <div className="flex flex-col items-center mb-10">
-                  <h3 className="text-indigo-400 text-sm font-semibold tracking-widest uppercase mb-2">
-                    Targeted Profile Questions
-                  </h3>
-                  <div className="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400">
-                    Top {questions.length}
-                  </div>
+              <div className="mt-6 pt-4 border-t border-gray-100 flex flex-col gap-4">
+                <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
+                  <span>⏱️ {test.duration_minutes} Minutes</span>
+                  <span>📝 {test.total_questions} Questions</span>
                 </div>
 
-                {/* Grid Layout: 1 col on mobile, 2 on tablet, 3 on wide desktop */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {questions.map((q, i) => (
-                    <div
-                      key={i}
-                      className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors flex flex-col h-full"
-                    >
-                      {/* Top Row: Category Badge & Number */}
-                      <div className="flex justify-between items-center mb-4">
-                        <span className="text-indigo-400 font-black text-xl opacity-50">
-                          {(i + 1).toString().padStart(2, "0")}
-                        </span>
-                        <span className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
-                          {q.category}
-                        </span>
-                      </div>
-
-                      {/* Middle: The actual question */}
-                      <p className="text-base text-gray-100 leading-relaxed font-medium mb-6 flex-grow">
-                        {q.question}
-                      </p>
-
-                      {/* Bottom: Why Asked Insight */}
-                      <div className="border-t border-white/10 pt-4 mt-auto">
-                        <p className="text-xs text-gray-400 leading-relaxed">
-                          <span className="font-semibold text-gray-300 uppercase tracking-wide text-[10px] block mb-1">
-                            Why this matters
-                          </span>
-                          {q.why_asked}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <button
+                  onClick={() => handleStartTest(test.id)}
+                  disabled={startingTestId !== null}
+                  className={`w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors text-center ${
+                    isCustom
+                      ? "bg-purple-600 hover:bg-purple-700 text-white shadow-sm disabled:bg-purple-300"
+                      : "bg-gray-900 hover:bg-gray-800 text-white disabled:bg-gray-300"
+                  }`}
+                >
+                  {isButtonLoading ? "Preparing Engine..." : "Start Assessment"}
+                </button>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          );
+        })}
       </div>
-    </main>
+    </div>
   );
 }
