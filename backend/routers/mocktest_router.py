@@ -42,7 +42,7 @@ async def get_test_catalog(user_id:str):
         
         if user and user.get("resumeText") and user["resumeText"].strip()!="":
             catalog.append({
-                "id":"dynamic_resume_text",
+                "id":"dynamic_resume_test",
                 "type":"resume_custom",
                 "title":"✨ Personalized Resume Assessment",
                 "description":"A dynamic 30-question test generated in real-time by AI based entirely on your master resume.",
@@ -136,10 +136,10 @@ async def start_mock_test(request:StartTestRequest):
         raise HTTPException(status_code=500,detail=str(e))
     
 
-@router.post("attempt/{attempt_id}/submit")
-async def submit_mock_test(attemp_id:str,request:SubmitTestRequest):
+@router.post("/attempt/{attempt_id}/submit")
+async def submit_mock_test(attempt_id:str,request:SubmitTestRequest):
     try:
-        attempt = test_attempts_collection.find_one({"_id":ObjectId(attemp_id)})
+        attempt = test_attempts_collection.find_one({"_id":ObjectId(attempt_id)})
         if not attempt:
             raise HTTPException(status_code=404,detail="Test attempt not found")
         
@@ -163,11 +163,11 @@ async def submit_mock_test(attemp_id:str,request:SubmitTestRequest):
         percentage = (score/total_questions)*100 if total_questions>0 else 0
 
         test_attempts_collection.update_one(
-            {"_id":ObjectId(attemp_id)},
+            {"_id":ObjectId(attempt_id)},
             {
                 "$set":{
                     "status":"completed",
-                    "user_answer":user_answers,
+                    "user_answers":user_answers,
                     "score":percentage,
                     "raw_score":f"{score}/{total_questions}"
                 }
@@ -197,6 +197,10 @@ async def get_test_results(attempt_id: str, user_id: str):
             raise HTTPException(status_code=400, detail="Test is not completed yet.")
 
         attempt["_id"] = str(attempt["_id"])
+
+        for q in attempt.get("questions", []):
+            if "_id" in q:
+                q["_id"] = str(q["_id"])
         return {"results": attempt}
 
     except Exception as e:
