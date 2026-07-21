@@ -16,5 +16,6 @@ users_collection = db.users
 tests_collection = db.tests
 questions_collection = db.questions
 test_attempts_collection = db.test_attempts
+placement_pipelines_collection = db["placement_pipelines"]
 
 

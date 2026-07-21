@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 from gtts import gTTS
 from typing import Optional
 
-load_dotenv()
 
-router = APIRouter()
+
+router = APIRouter(prefix='/api/v1',tags=["Interview"])
 
 GEMINI_API_KEY = os.getenv("GEMINI_API")
 if not GEMINI_API_KEY:

@@ -21,19 +21,18 @@ class AIResumeTestResult(BaseModel):
 
 def generate_resume_mcq_test(resume_text:str)->AIResumeTestResult:
     prompt = f"""
-    You are a strict technical interviewer.
-    Analyze the following resume text and generate exactly 30 multiple-choice questions (MCQs).
-    
-    The questions must be deep, specific to the tech stacks mentioned, and directly address 
-    the projects, tools, and experience listed. 
-    
-    For each question, provide:
-    1. The question text.
-    2. Exactly 4 plausible options in an array.
-    3. The exact string of the correct answer (must match one of the options exactly).
-    4. A short explanation of why it is correct.
-    
-    Resume Content:
+    You are an elite Senior Technical Interviewer. I am going to provide you with a candidate's resume. 
+
+    YOUR INSTRUCTIONS:
+    1. DO NOT ask questions about the resume document itself. Do not ask about dates, job titles, or what the user wrote.
+    2. Analyze the resume and extract the core programming languages, frameworks, databases, and architectural concepts the candidate claims to know.
+    3. Generate a moderate-to-tough 30-question multiple-choice technical exam to test if the candidate actually possesses the skills they listed. 
+    4. The questions must be conceptual, scenario-based, or code-behavior questions based on their tech stack.
+
+    Return the response STRICTLY as a JSON array of objects with the following keys:
+    "question_text" (string), "options" (array of 4 strings), "correct_answer" (string), and "explanation" (string).
+
+    Here is the candidate's resume:
     {resume_text}
     """
 

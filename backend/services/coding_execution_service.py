@@ -63,7 +63,7 @@ async def execute_with_jdoodle(user_code: str, test_cases: List[TestCase]) -> di
         stdout_val = raw_output
         stderr_val = ""
         
-        if "Traceback (most recent call" in raw_output or "SyntaxError:" in raw_output or "IndentationError:" in raw_output:
+        if "Traceback (most recent call)" in raw_output or "SyntaxError:" in raw_output or "IndentationError:" in raw_output:
             stderr_val = raw_output
             stdout_val = ""
             

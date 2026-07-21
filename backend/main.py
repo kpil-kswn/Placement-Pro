@@ -12,9 +12,10 @@ from services.ats_scanner import evaluate_resume_against_jd,extract_text_from_pd
 from services.chat_service import process_chat_message,generate_chat_title
 
 from routers.aptech_router import router as aptech_router
-from routers import interview_router
+from routers.interview_router import router as interview_router
 from routers.coding_router import router as coding_router
 from routers.mocktest_router import router as mocktest_router
+from routers.pipeline_router import router as pipeline_router
 load_dotenv()
 
 app = FastAPI(title="PlacementPro Backend")
@@ -29,8 +30,9 @@ app.add_middleware(
 )
 app.include_router(aptech_router)
 app.include_router(coding_router)
-app.include_router(interview_router.router,tags=["AI Voice Interview"])
+app.include_router(interview_router)
 app.include_router(mocktest_router)
+app.include_router(pipeline_router)
 
 @app.post("/api/v1/ats/scan",response_model=ATSResult)
 async def scan_resume(resume:UploadFile=File(...),

@@ -23,7 +23,7 @@ export default function Navbar() {
           <Link href="/service/ats">ATS</Link>
           <Link href="/service/chat">Chat With AI</Link>
           <Link href="/service/mock-test">MockTest</Link>
-          <Link href="/service/interview/aiinterview">AI Interview</Link>
+          <Link href="/placement">AI Interview</Link>
 
           {status === "unauthenticated" && (
             <button
