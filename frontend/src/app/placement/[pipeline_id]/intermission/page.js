@@ -1,5 +1,6 @@
+"use client"
 import { useParams,useSearchParams,useRouter } from "next/navigation";
-import { useEffect,useState } from "react";
+import { useState } from "react";
 
 export async function Intermission() {
     const router = useRouter()

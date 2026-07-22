@@ -52,7 +52,15 @@ async def generate_coding_problem_background(pipeline_id:str,resume_text:Optiona
     except Exception as e:
         print(f"Background task failed for pipeline {pipeline_id}:{e}")
 
-    
+
+@router.get('/{pipeline_id}')
+async def get_pipline_data(pipeline_id:str):
+    pipeline  = placement_pipelines_collection.find_one({"_id":ObjectId(pipeline_id)})
+    if not pipeline:
+        raise HTTPException(status_code=404,detail="Pipeline not Found.")
+    pipeline["_id"] = str(pipeline["_id"])
+    return pipeline
+
 @router.post("/start")
 async def start_placement_pipeline(
     background_tasks:BackgroundTasks,
@@ -314,9 +322,8 @@ async def submit_coding_round(pipeline_id:str):
     except Exception as e:
         print("Submit Coding Error:",e)
         raise HTTPException(status_code=500,detail=str(e))
+
     
-
-
 class Message(BaseModel):
     role: str  # "user" or "model"
     text: str = ""
