@@ -4,6 +4,7 @@ import asyncio
 from datetime import datetime,timezone
 from schemas.pipeline_schema import InterviewTurn
 import re
+import json
 from typing import Optional
 from pydantic import BaseModel,Field
 from typing import List
@@ -20,7 +21,7 @@ from schemas.pipeline_schema import PlacementPipelineDB,CodingProblemState
 from services.aptech_service import generate_assessment_test
 from services.coding_service import generate_coding_problem,generate_code_critique
 from services.coding_execution_service import execute_with_jdoodle
-from database import placement_pipelines_collection
+from database import placement_pipelines_collection,users_collection
 
 load_dotenv()
 
@@ -331,14 +332,22 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[Message]
+    user_id:Optional[str] = None
 
 @router.post('/interview')
 async def interview_chat(request: ChatRequest):
     try:
+        candidate_context = "Software Engineer with Python and React experience."
+        if request.user_id:
+            user_profile = users_collection.find_one({"_id": ObjectId(request.user_id)})
+            if user_profile and user_profile.get("resume_text"):
+                candidate_context = user_profile.get("resume_text")
         system_instruction = (
             "You are an elite technical interviewer. "
+            f"Context about the candidate: {candidate_context}\n"
+            "Do NOT ask them to recite their resume. Instead, pick a specific technology, project, or skill mentioned in their context and ask a deep, challenging technical question about it. "
             "When the candidate answers, first evaluate their answer (score out of 10) and give a brief 1-sentence critique. "
-            "THEN, ask the next technical follow-up question. "
+            "THEN, ask the next technical follow-up question based on their answer or another resume topic. "
             "You MUST format your response exactly like this:\n"
             "EVALUATION: <score and critique>\n"
             "QUESTION: <your next question>"
@@ -460,6 +469,72 @@ async def finish_interview_round(pipeline_id:str,payload:PipelineInterviewSubmit
         raise HTTPException(status_code=500,detail=str(e))
 
 
+class FinalPlacementReport(BaseModel):
+    readiness_level: str = Field(description="A short label (e.g., 'Industry Ready', 'Needs Core Practice', 'Strong Performer')")
+    overall_score_out_of_100: int = Field(description="Integer score out of 100 across all rounds.")
+    executive_summary: str = Field(description="1 paragraph summary of their overall performance.")
+    top_strengths: List[str] = Field(description="Top 3 technical and communication strengths.")
+    key_weaknesses: List[str] = Field(description="Key areas where the candidate struggled.")
+    action_plan: List[str] = Field(description="3 to 5 actionable steps to improve before a real interview.")
+
+@router.get("/{pipeline_id}/results")
+async def get_final_results(pipeline_id: str):
+    try:
+        pipeline = placement_pipelines_collection.find_one({"_id": ObjectId(pipeline_id)})
+        if not pipeline:
+            raise HTTPException(status_code=404, detail="Pipeline not found")
+        if pipeline.get("final_report"):
+            pipeline["_id"] = str(pipeline["_id"])
+            return {"status": "success", "report": pipeline["final_report"], "pipeline_data": pipeline}
+        aptech = pipeline.get("aptech_round", {}).get("evaluation", {})
+        aptech_score = aptech.get("score_percentage", 0)        
+        coding = pipeline.get("coding_round", {}).get("problems", [])
+        coding_summary = []
+        for p in coding:
+            eval_data = p.get("evaluation", {})
+            coding_summary.append({
+                "difficulty": p.get("difficulty"),
+                "status": eval_data.get("status"),
+                "passed": eval_data.get("passed_cases"),
+                "total": eval_data.get("total_cases"),
+                "ai_critique": eval_data.get("ai_critique")
+            })
+            
+        interview = pipeline.get("interview_round", {}).get("chat_log", [])
+        interview_summary = "\n".join([f"Q: {t.get('ai_question')}\nA: {t.get('user_answer')}\nFeedback: {t.get('ai_feedback')}" for t in interview])
+        
+        prompt = f"""
+        You are an expert Enterprise Technical Recruiter and Career Coach. 
+        Evaluate this candidate's performance across 3 rounds and generate a Final Placement Readiness Report.
+        
+        ROUND 1: Aptitude & Tech (MCQ) - Score: {aptech_score}%
+        ROUND 2: Coding Test - {json.dumps(coding_summary)}
+        ROUND 3: Technical Voice Interview - {interview_summary}
+        """
+        
+        # 6. Force Gemini to return JSON matching the Pydantic schema
+        ai_response = await client.aio.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=FinalPlacementReport,
+                temperature=0.2
+            )
+        )
+        final_report = json.loads(ai_response.text)
+        
+        placement_pipelines_collection.update_one(
+            {"_id": ObjectId(pipeline_id)},
+            {"$set": {"final_report": final_report, "global_status": "COMPLETED"}}
+        )
+        
+        pipeline["_id"] = str(pipeline["_id"])
+        return {"status": "success", "report": final_report, "pipeline_data": pipeline}
+        
+    except Exception as e:
+        print("Report Generation Error:", e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 

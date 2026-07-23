@@ -6,7 +6,7 @@ export async function GET(req, { params }) {
     try {
         const { pipelineId } = await params;
         
-        const response = await fetch(`${BACKEND_URL}/pipeline/${pipelineId}/status`, {
+        const response = await fetch(`${BACKEND_URL}/pipeline/${pipelineId}/results`, {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         });
@@ -14,7 +14,7 @@ export async function GET(req, { params }) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.detail || "Failed to fetch status" }, { status: response.status });
+            return NextResponse.json({ error: data.detail || "Failed to fetch final results" }, { status: response.status });
         }
         return NextResponse.json(data);
     } catch (error) {

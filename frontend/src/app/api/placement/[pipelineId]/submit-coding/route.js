@@ -4,9 +4,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/ap
 
 export async function POST(req, { params }) {
     try {
-        const { pipelineId } = params;
-        
-        // This endpoint doesn't require a body since it grades the auto-saved drafts
+        const { pipelineId } = await params;
         const response = await fetch(`${BACKEND_URL}/pipeline/${pipelineId}/submit-coding`, {
             method: "POST",
             headers: { "Content-Type": "application/json" }

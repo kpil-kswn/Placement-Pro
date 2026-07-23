@@ -8,24 +8,15 @@ from services.coding_service import generate_coding_problem,generate_code_critiq
 
 router = APIRouter(prefix='/api/v1/programming',tags=["Coding Assessment"])
 
-@router.post("/generate",response_model=CodingProblemGeneration)
-async def generate_problem(resume_text:Optional[str]=Body(None,embed=True)):
-    try:
-        problem = await generate_coding_problem(resume_text=resume_text)
-        return problem
-    except Exception as e:
-        raise HTTPException(status_code=500,detail=str(e))
-
-
 @router.post("/execute",response_model=EvaluationResult)
 async def execute_code(submission:CodeSubmission):
     try:
-        piston_response = await execute_with_jdoodle(
+        jdoodle_response = await execute_with_jdoodle(
             user_code=submission.source_code,
             test_cases=submission.test_case
         )
-        raw_output = piston_response.get("run",{}).get("stdout","")
-        stderr = piston_response.get("run",{}).get("stderr","")
+        raw_output = jdoodle_response.get("run",{}).get("stdout","")
+        stderr = jdoodle_response.get("run",{}).get("stderr","")
         if stderr:
             return EvaluationResult(
                 status="Error",

@@ -4,7 +4,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/ap
 
 export async function GET(req, { params }) {
     try {
-        const { pipelineId } = params;
+        const { pipelineId } = await params;
         const response = await fetch(`${BACKEND_URL}/pipeline/${pipelineId}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" }

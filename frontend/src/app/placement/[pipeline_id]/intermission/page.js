@@ -1,18 +1,44 @@
-"use client"
-import { useParams,useSearchParams,useRouter } from "next/navigation";
-import { useState } from "react";
+"use client";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useState,useEffect } from "react";
 
-export async function Intermission() {
-    const router = useRouter()
-    const params = useParams()
-    const searchParams = useSearchParams()
+export default function Intermission() {
+  const router = useRouter();
+  const params = useParams();
+  const searchParams = useSearchParams();
 
-    const pipelineId = params.pipelineId
-    const round = searchParams.get("round") || "1"
-    const [loading,setLoading] = useState(false)
+  const pipelineId = params.pipelineId;
+  const round = searchParams.get("round") || "1";
+  const [loading, setLoading] = useState(false);
 
-    const roundConfig = {
-    "1": {
+  useEffect(() => {
+    const enforceRouteSecurity = async () => {
+      try {
+        const res = await fetch(`/api/placement/${pipelineId}/status`);
+        const data = await res.json();
+        const routeMap = {
+          ROUND_1_APTECH: `/placement/${pipelineId}/round1-aptech`,
+          ROUND_1_INTERMISSION: `/placement/${pipelineId}/intermission?round=2`,
+          ROUND_2_CODING: `/placement/${pipelineId}/round2-coding`,
+          ROUND_2_INTERMISSION: `/placement/${pipelineId}/intermission?round=3`,
+          ROUND_3_INTERVIEW: `/placement/${pipelineId}/round3-interview`,
+          COMPLETED: `/placement/${pipelineId}/results`,
+        };
+        const correctRoute = routeMap[data.global_status];
+        const currentPath = window.location.pathname + window.location.search;
+        if (correctRoute && !currentPath.includes(correctRoute.split("?")[0])) {
+          router.push(correctRoute);
+        }
+      } catch (error) {
+        console.error("Status check failed", error);
+      }
+    };
+
+    enforceRouteSecurity();
+  }, [pipelineId, router]);
+
+  const roundConfig = {
+    1: {
       title: "Round 1: Aptitude & Technical Assessment",
       duration: "30 Minutes",
       questions: "30 Multiple Choice Questions",
@@ -20,12 +46,12 @@ export async function Intermission() {
         "You have exactly 1 minute per question on average.",
         "There is no negative marking, so attempt all questions.",
         "Do not switch tabs or exit full-screen mode. Doing so may flag your test.",
-        "The test will automatically submit when the timer reaches zero."
+        "The test will automatically submit when the timer reaches zero.",
       ],
       nextPath: `/placement/${pipelineId}/round1-aptech`,
-      buttonText: "Start Aptitude & Technical Round"
+      buttonText: "Start Aptitude & Technical Round",
     },
-    "2": {
+    2: {
       title: "Round 2: Data Structures & Algorithms",
       duration: "120 Minutes",
       questions: "3 Coding Problems (Easy, Medium, Hard)",
@@ -33,12 +59,12 @@ export async function Intermission() {
         "You may write code in Python, JavaScript, C++, or Java.",
         "Your code is auto-saved continuously in the background.",
         "You must pass the hidden test cases to get full marks.",
-        "Focus on time and space complexity."
+        "Focus on time and space complexity.",
       ],
       nextPath: `/placement/${pipelineId}/round2-coding`,
-      buttonText: "Start Coding Round"
+      buttonText: "Start Coding Round",
     },
-    "3": {
+    3: {
       title: "Round 3: AI Voice Interview",
       duration: "20 Minutes",
       questions: "Dynamic Technical Discussion",
@@ -46,24 +72,24 @@ export async function Intermission() {
         "Ensure your microphone is connected and permissions are granted.",
         "Speak clearly. The AI will evaluate your communication and technical depth.",
         "You will be asked to explain your approaches to previous problems.",
-        "Find a quiet room with no background noise."
+        "Find a quiet room with no background noise.",
       ],
       nextPath: `/placement/${pipelineId}/round3-interview`,
-      buttonText: "Start Interview Round"
-    }
+      buttonText: "Start Interview Round",
+    },
   };
 
-  const currentRound = roundConfig[round]
+  const currentRound = roundConfig[round];
 
-  if(!currentRound){
-    router.push(`/placement/${pipelineId}/results`)
-    return null
+  if (!currentRound) {
+    router.push(`/placement/${pipelineId}/results`);
+    return null;
   }
 
-  const handleStartRound = ()=>{
-    setLoading(true)
-    router.push(currentRound.nextPath)
-  }
+  const handleStartRound = () => {
+    setLoading(true);
+    router.push(currentRound.nextPath);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

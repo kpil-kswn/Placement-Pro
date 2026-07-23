@@ -11,7 +11,7 @@ client = genai.Client(api_key=os.getenv("GEMINI_API"))
 
 # to generate test questions
 async def generate_assessment_test(resume_text: Optional[str]=None)->AssessmentTestResponse:
-    profile_context = resume_text if resume_text else "A general software engineering and core computer science profile."
+    profile_context = "A general software engineering and core computer science profile."
     prompt = f"""
     You are an expert technical interviewer and psychometric evaluator.
     Generate a comprehensive evaluation test consisting of exactly 30 multiple-choice questions.

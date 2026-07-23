@@ -52,7 +52,7 @@ class PlacementPipelineDB(BaseModel):
     aptech_round:AptechRound = Field(default_factory=AptechRound)
     coding_round:CodingRound = Field(default_factory=CodingRound)
     interview_round:InterviewRound = Field(default_factory=InterviewRound)
-    final_hiring_recommendation : Optional[str] = None
+    final_report : Optional[str] = None
     
 
 

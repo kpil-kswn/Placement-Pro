@@ -10,7 +10,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv('GEMINI_API'))
 
 async def generate_coding_problem(resume_text:Optional[str]=None)->CodingProblemGeneration:
-    candidate_context = resume_text if resume_text else "General Python Data structures and Algoritham"
+    candidate_context = "General Python Data structures and Algoritham"
 
     prompt = f"""
     You are a Senior Staff Software Engineer at a top-tier tech company conducting a technical interview.
