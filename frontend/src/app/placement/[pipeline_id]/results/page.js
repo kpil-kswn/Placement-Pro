@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 export default function PlacementResultsDashboard() {
-  const { pipelineId } = useParams();
+  const params = useParams();
   const router = useRouter();
+
+  const pipelineId = params.pipeline_id
 
   const [report, setReport] = useState(null);
   const [pipelineData, setPipelineData] = useState(null);
@@ -16,10 +18,32 @@ export default function PlacementResultsDashboard() {
       try {
         const res = await fetch(`/api/placement/${pipelineId}/status`);
         const data = await res.json();
-        
-        if (data.global_status !== "COMPLETED") {
-            alert("You haven't completed the assessment yet!");
-            router.push(`/placement`); 
+        const status = data.global_status;
+        const path = window.location.pathname;
+        const query = window.location.search;
+        let redirectUrl = null;
+        if (status === "ROUND_1_APTECH" || status === "STARTED") {
+           if (!path.includes("round1") && query !== "?round=1") {
+               redirectUrl = `/placement/${pipelineId}/intermission?round=1`;
+           }
+        } 
+        else if (status === "ROUND_2_CODING" || status === "ROUND_1_INTERMISSION") {
+           if (!path.includes("round2") && query !== "?round=2") {
+               redirectUrl = `/placement/${pipelineId}/intermission?round=2`;
+           }
+        }
+        else if (status === "ROUND_3_INTERVIEW" || status === "ROUND_2_INTERMISSION") {
+           if (!path.includes("round3") && query !== "?round=3") {
+               redirectUrl = `/placement/${pipelineId}/intermission?round=3`;
+           }
+        }
+        else if (status === "COMPLETED") {
+           if (!path.includes("results")) {
+               redirectUrl = `/placement/${pipelineId}/results`;
+           }
+        }
+        if (redirectUrl) {
+           router.push(redirectUrl);
         }
       } catch (error) {
         console.error("Status check failed", error);

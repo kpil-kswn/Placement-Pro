@@ -28,7 +28,6 @@ export default function PlacementLandingPage() {
             if(!res.ok) throw new Error(data.error)
             
             localStorage.setItem(`aptech_${data.pipeline_id}`,JSON.stringify(data.aptech_test))
-
             router.push(`/placement/${data.pipeline_id}/intermission?round=1`)
         } catch(error){
             console.error(error)

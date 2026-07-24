@@ -62,6 +62,7 @@ async def get_pipline_data(pipeline_id:str):
     pipeline["_id"] = str(pipeline["_id"])
     return pipeline
 
+
 @router.post("/start")
 async def start_placement_pipeline(
     background_tasks:BackgroundTasks,
@@ -72,7 +73,7 @@ async def start_placement_pipeline(
         pipeline = PlacementPipelineDB(
             user_id=user_id,
             resume_text=resume_text,
-            global_status='ROUND_1_APTECH'
+            global_status='STARTED'
         )
 
         pipeline_dict = pipeline.dict(by_alias=True)
@@ -80,6 +81,7 @@ async def start_placement_pipeline(
         pipeline_id = str(result.inserted_id)
 
         aptech_data = await generate_assessment_test(resume_text=resume_text)
+        aptech_data.questions = aptech_data.questions[:30]
         placement_pipelines_collection.update_one(
             {"_id":ObjectId(pipeline_id)},
             {"$set":{
