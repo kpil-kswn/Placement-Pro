@@ -5,4 +5,5 @@ pdfplumber
 protobuf
 pydantic
 pymongo
+uvicorn
 python-dotenv
