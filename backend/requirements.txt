@@ -1,7 +1,8 @@
 fastapi
-uvicorn
-pymongo
-google-genai
 gTTS
+httpx
+pdfplumber
+protobuf
 pydantic
+pymongo
 python-dotenv
