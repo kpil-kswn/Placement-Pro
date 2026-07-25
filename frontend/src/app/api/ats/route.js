@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 
 export async function POST(request){
+
+    const Backend = process.env.NEXT_PUBLIC_API_URL
     try{
         const formData = await request.formData();
-        const backendUrl = "http://localhost:8000/api/v1/ats/scan"
+        const backendUrl = `${Backend}/ats/scan`
 
         const backendResponse = await fetch(backendUrl,{
             method:"POST",

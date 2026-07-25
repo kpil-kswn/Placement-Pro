@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
-const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"
+const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL
 
 export async function POST(request) {
     try {
