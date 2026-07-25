@@ -6,9 +6,7 @@ import { useSession } from "next-auth/react";
 
 export default function VoiceInterviewRound() {
   const router = useRouter();
-  const params = useParams();
-  
-  // Bulletproof ID fetching: Works whether your folder is [pipeline_id] or [pipelineId]
+  const params = useParams();  
   const pipelineId = params.pipelineId || params.pipeline_id;
   
   const { data: session } = useSession();
