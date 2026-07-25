@@ -4,3 +4,4 @@ pymongo
 google-genai
 gTTS
 pydantic
+python-dotenv
