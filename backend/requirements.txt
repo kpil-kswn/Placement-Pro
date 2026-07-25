@@ -1,6 +1,7 @@
 fastapi
 gTTS
 httpx
+google-genai
 pdfplumber
 protobuf
 pydantic
