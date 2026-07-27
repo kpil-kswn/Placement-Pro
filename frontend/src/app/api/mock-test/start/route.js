@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
-const PYTHON_BACKEND_URL = process.env.PYTHON_BACKEND_URL
+const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL
 
 export async function POST(req) {
   try {

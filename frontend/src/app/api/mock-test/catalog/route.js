@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 
-const PYTHON_BACKEND_URL = process.env.PYTHON_BACKEND_URL
+const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL
 
 export async function GET(){
     try{
