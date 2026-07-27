@@ -73,7 +73,7 @@ async def start_placement_pipeline(
         pipeline = PlacementPipelineDB(
             user_id=user_id,
             resume_text=resume_text,
-            global_status='STARTED'
+            global_status='ROUND_1_APTECH'
         )
 
         pipeline_dict = pipeline.dict(by_alias=True)
