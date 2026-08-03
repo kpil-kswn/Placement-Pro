@@ -4,7 +4,7 @@ import Providers from "@/components/Providers";
 
 export const metadata = {
   title: "Placement Pro",
-  description: "Placement Pro, Now confirm your placement...!",
+  description: "Placement Pro, Now confirm your placement...! ",
 };
 
 export default function RootLayout({ children }) {
