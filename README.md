@@ -1,7 +1,7 @@
 # 🚀 PlacementPro: AI-Powered Interview Preparation Platform
 
-**Live Demo:** [Insert your Vercel Live Link Here]  
-**Backend API Docs:** [https://placementpro-69dl.onrender.com/docs]
+**Live Demo:** https://placement-pro-six.vercel.app
+**Backend API Docs:** https://placementpro-69dl.onrender.com
 
 PlacementPro is a full-stack, AI-driven platform designed to help candidates ace their interviews. By leveraging advanced generative AI (Google Gemini), dynamic resume parsing, and text-to-speech technologies, PlacementPro generates hyper-personalized mock interviews, evaluates user responses, and provides actionable feedback to guarantee interview readiness.
 
@@ -66,8 +66,10 @@ Triggers the Google GenAI model to generate the next interview question or evalu
 This project operates as a monorepo containing both the frontend and backend. To run the application locally, you will need two separate terminal windows.
 
 ### 1. Start the Python AI Engine (Backend)
-Open a terminal and navigate to the `backend` directory:
+Open a terminal and navigate to the folder containing the Python backend:
+
 ```bash
+# Navigate into the backend directory
 cd backend
 
 # Create and activate a virtual environment
@@ -77,9 +79,37 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Set up your local environment variables (.env)
-# Must include MONGO_URI, GEMINI_API_KEY, etc.
-
 # Start the FastAPI server
 uvicorn main:app --reload --port 8000
+```
 
+*The AI API will now be running at `http://localhost:8000`*
+
+### 2. Start the Next.js Dashboard (Frontend)
+
+Open a new terminal and navigate to the folder containing the Next.js frontend:
+
+```bash
+# Navigate into the frontend directory
+cd frontend
+
+# Install the required Node modules
+npm install
+
+# Start the Next.js development server
+npm run dev
+```
+
+*The Frontend Dashboard will now be running at `http://localhost:3000`*
+
+---
+
+## 👨‍💻 Architecture & Design Notes
+
+This project demonstrates modern full-stack development patterns:
+
+- **Client/Server Component Separation:** Strict use of Next.js App Router features, heavily relying on Server Components to reduce client bundle size, with explicit `'use client'` boundaries for interactive UI, modals, and recording interfaces.
+- **API Proxy Pattern:** To prevent CORS issues and shield internal backend structures, the Next.js frontend utilizes Route Handlers (`app/api/...`) to proxy server-side requests securely to the Python backend.
+- **Monorepo CI/CD:** Deployment pipelines on Vercel and Render are configured with Root Directory settings (`frontend/` and `backend/`). Pushing commits to GitHub automatically triggers targeted, zero-downtime builds only for the microservice that was actually modified.
+- **AI & Audio Pipeline:** Resumes are parsed asynchronously via `pdfplumber`, fed into Google Gemini to build customized prompt constraints, and dynamically converted into verbal questions via `gTTS` to create a seamless conversation loop.
+- **Dynamic Imports:** UI components that rely heavily on browser-specific APIs (like audio recording or window objects) are dynamically imported (`next/dynamic` with `ssr: false`) to prevent server-side rendering hydration errors.
